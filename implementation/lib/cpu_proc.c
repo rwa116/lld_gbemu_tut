@@ -30,7 +30,7 @@ static void proc_di(cpu_context *ctx) {
     ctx->int_master_enabled = false;
 }
 
-static proc_ld(cpu_context *ctx) {
+static void proc_ld(cpu_context *ctx) {
     if(ctx->dest_is_mem) {
         if(ctx->cur_inst->reg_2 >= RT_AF) {
             //if 16 bit register...
@@ -60,7 +60,18 @@ static proc_ld(cpu_context *ctx) {
     cpu_set_reg(ctx->cur_inst->reg_1, ctx->fetched_data);
 }
 
-static proc_xor(cpu_context *ctx) {
+static void proc_ldh(cpu_context *ctx) {
+    if(ctx->cur_inst->reg_1 == RT_A) {
+        cpu_set_reg(ctx->cur_inst->reg_1, bus_read(0xFF00 | ctx->fetched_data));
+    }
+    else {
+        bus_write(0xFF00 | ctx->fetched_data, ctx->regs.a);
+    }
+
+    emu_cycles(1);
+}
+
+static void proc_xor(cpu_context *ctx) {
     ctx->regs.a ^= ctx->fetched_data & 0xFF;
     cpu_set_flags(ctx, ctx->regs.a == 0, 0, 0, 0);
 }
@@ -80,7 +91,7 @@ static bool check_cond(cpu_context *ctx) {
     return false;
 }
 
-static proc_jp(cpu_context *ctx) {
+static void proc_jp(cpu_context *ctx) {
     if(check_cond(ctx)) {
         ctx->regs.pc = ctx->fetched_data;
         emu_cycles(1);
@@ -91,6 +102,7 @@ static IN_PROC processors[] = {
     [IN_NONE] = proc_none,
     [IN_NOP] = proc_nop,
     [IN_LD] = proc_ld,
+    [IN_LDH] = proc_ldh,
     [IN_JP] = proc_jp,
     [IN_DI] = proc_di,
     [IN_XOR] = proc_xor
