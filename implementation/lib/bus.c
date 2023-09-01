@@ -24,7 +24,7 @@ u8 bus_read(u16 address) {
     else if(address < 0xA000) {
         //Char/map data
         //TODO ...
-        printf("UNSUPPORETED bus read(%04X)\n", address);
+        printf("UNSUPPORTED bus read(%04X)\n", address);
         NO_IMPL
     }
     else if(address < 0xC000) {
@@ -42,7 +42,7 @@ u8 bus_read(u16 address) {
     else if(address < 0xFEA0) {
         //OAM
         //TODO ...
-        printf("UNSUPPORETED bus read(%04X)\n", address);
+        printf("UNSUPPORTED bus read(%04X)\n", address);
         NO_IMPL
     }
     else if(address < 0xFF00) {
@@ -52,8 +52,8 @@ u8 bus_read(u16 address) {
     else if(address < 0xFF80) {
         //IO Registers
         //TODO ...
-        printf("UNSUPPORETED bus read(%04X)\n", address);
-        //NO_IMPL
+        printf("UNSUPPORTED bus read(%04X)\n", address);
+        NO_IMPL
     }
     else if(address == 0xFFFF) {
         //CPU Enable Register
@@ -98,7 +98,7 @@ void bus_write(u16 address, u8 value) {
         //IO Registers
         //TODO ...
         printf("UNSUPPORTED bus write(%04X)\n", address);
-        //sssssNO_IMPL
+        //NO_IMPL
     }
     else if(address == 0xFFFF) {
         //CPU Enable Register
