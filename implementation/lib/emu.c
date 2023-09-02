@@ -5,6 +5,7 @@
 #include <ui.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <timer.h>
 
 /* 
   Emu components:
@@ -24,11 +25,12 @@ emu_context *emu_get_context() {
 }
 
 void *cpu_run(void *p) {
+    timer_init();
+    cpu_init();
+
     ctx.running = true;
     ctx.paused = false;
     ctx.ticks = 0;
-
-    cpu_init();
 
     while(ctx.running) {
         if (ctx.paused) {
@@ -40,8 +42,6 @@ void *cpu_run(void *p) {
             printf("CPU Stopped\n");
             return 0;
         }
-
-        ctx.ticks++;
     }
 
     return 0;
@@ -78,5 +78,10 @@ int emu_run(int argc, char **argv) {
 }
 
 void emu_cycles(int cpu_cycles) {
-    //TODO...
+    int n = cpu_cycles * 4;
+
+    for(int i=0; i < n; i++) {
+        ctx.ticks++;
+        timer_tick();
+    }
 }

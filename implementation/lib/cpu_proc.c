@@ -5,7 +5,7 @@
 
 //processes CPU instructions...
 
-void cpu_set_flags(cpu_context *ctx, char z, char n, char h, char c) {
+void cpu_set_flags(cpu_context *ctx, int8_t z, int8_t n, int8_t h, int8_t c) {
     if(z != -1) {
         BIT_SET(ctx->regs.f, 7, z);
     }
@@ -116,6 +116,7 @@ static void proc_cb(cpu_context *ctx) {
             //RR
             u8 old = reg_val;
             reg_val >>= 1;
+
             reg_val |= (flagC << 7);
 
             cpu_set_reg8(reg, reg_val);
@@ -162,7 +163,7 @@ static void proc_cb(cpu_context *ctx) {
 
 static void proc_rlca(cpu_context *ctx) {
     u8 u = ctx->regs.a;
-    bool c = (u << 7) & 1;
+    bool c = (u >> 7) & 1;
     u = (u << 1) | c;
     ctx->regs.a = u;
 
@@ -181,16 +182,15 @@ static void proc_rrca(cpu_context *ctx) {
 static void proc_rla(cpu_context *ctx) {
     u8 u = ctx->regs.a;
     u8 cf = CPU_FLAG_C;
-    u8 c = (u << 7) & 1;
+    u8 c = (u >> 7) & 1;
 
     ctx->regs.a = (u << 1) | cf;
-
     cpu_set_flags(ctx, 0, 0, 0, c);
 }
 
 static void proc_stop(cpu_context *ctx) {
     fprintf(stderr, "STOPPING!\n");
-    NO_IMPL;
+    NO_IMPL
 }
 
 static void proc_daa(cpu_context *ctx) {
@@ -265,7 +265,7 @@ static void proc_di(cpu_context *ctx) {
 }
 
 static void proc_ei(cpu_context *ctx) {
-    ctx->enabling_ime = false;
+    ctx->enabling_ime = true;
 }
 
 static bool is_16_bit(reg_type rt) {
@@ -346,7 +346,7 @@ static void proc_jp(cpu_context *ctx) {
 }
 
 static void proc_jr(cpu_context *ctx) {
-    char rel = (char)(ctx->fetched_data & 0xFF);
+    int8_t rel = (char)(ctx->fetched_data & 0xFF);
     u16 addr = ctx->regs.pc + rel;
     goto_addr(ctx, addr, false);
 }
@@ -398,7 +398,6 @@ static void proc_ret(cpu_context *ctx) {
         emu_cycles(1);
 
         u16 n = (hi << 8) | lo;
-        printf("\tSetting PC from %04X to %04X\n", ctx->regs.pc, n);
         ctx->regs.pc = n;
 
         emu_cycles(1);
@@ -432,6 +431,7 @@ static void proc_inc(cpu_context *ctx) {
 
     cpu_set_flags(ctx, val == 0, 0, (val & 0x0F) == 0, -1);
 }
+
 static void proc_dec(cpu_context *ctx) {
     u16 val = cpu_read_reg(ctx->cur_inst->reg_1) - 1;
 
@@ -509,7 +509,7 @@ static void proc_add(cpu_context *ctx) {
     if(is_16bit) {
         z = -1;
         h = (cpu_read_reg(ctx->cur_inst->reg_1) & 0xFFF) + (ctx->fetched_data & 0xFFF) >= 0x1000;
-        u32 n = ((u32)cpu_read_reg(ctx->cur_inst->reg_1)) + ((u32)ctx->fetched_data & 0xFF);
+        u32 n = ((u32)cpu_read_reg(ctx->cur_inst->reg_1)) + ((u32)ctx->fetched_data);
         c = n >= 0x10000;
     }
 
