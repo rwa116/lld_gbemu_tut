@@ -2,7 +2,9 @@
 #include <cart.h>
 #include <ram.h>
 #include <cpu.h>
+#include <dma.h>
 #include <io.h>
+#include <ppu.h>
 
 // 0000	3FFF	16 KiB ROM bank 00	From cartridge, usually a fixed bank
 // 4000	7FFF	16 KiB ROM Bank 01~NN	From cartridge, switchable bank via mapper (if any)
@@ -23,10 +25,8 @@ u8 bus_read(u16 address) {
         return cart_read(address);
     }
     else if(address < 0xA000) {
-        //Char/map data
-        //TODO ...
-        printf("UNSUPPORTED bus read(%04X)\n", address);
-        NO_IMPL
+        //Char/Map data
+        return ppu_vram_read(address);
     }
     else if(address < 0xC000) {
         //Cartridge RAM
@@ -38,13 +38,14 @@ u8 bus_read(u16 address) {
     }
     else if(address < 0xFE00) {
         //Reserved echo ram
-        return 0;
+        return 0x0;
     }
     else if(address < 0xFEA0) {
         //OAM
-        //TODO ...
-        printf("UNSUPPORTED bus read(%04X)\n", address);
-        return 0; //NO_IMPL
+        if(dma_transferring()) {
+            return 0xFF;
+        }
+        return ppu_oam_read(address);
     }
     else if(address < 0xFF00) {
         //Reserved
@@ -69,9 +70,7 @@ void bus_write(u16 address, u8 value) {
     } 
     else if(address < 0xA000) {
         //Char/map data
-        //TODO ...
-        printf("UNSUPPORTED bus write(%04X)\n", address);
-        //NO_IMPL
+        ppu_vram_write(address, value);
     }
     else if(address < 0xC000) {
         //Cartridge RAM
@@ -86,9 +85,10 @@ void bus_write(u16 address, u8 value) {
     }
     else if(address < 0xFEA0) {
         //OAM
-        //TODO ...
-        printf("UNSUPPORTED bus write(%04X)\n", address);
-        //NO_IMPL
+        if(dma_transferring()) {
+            return;
+        }
+        ppu_oam_write(address, value);
     }
     else if(address < 0xFF00) {
         //Reserved
