@@ -71,6 +71,6 @@ void lcd_write(u16 address, u8 value) {
         update_palette(value & 0b11111100, 1);
     }
     else if(address == 0xFF49) {
-        update_palette(value & 0b11111100, 1);
+        update_palette(value & 0b11111100, 2);
     }
 }

@@ -19,7 +19,7 @@ void dma_start(u8 start) {
 }
 
 void dma_tick() {
-    if(ctx.active) {
+    if(!ctx.active) {
         return;
     }
     if(ctx.start_delay) {
