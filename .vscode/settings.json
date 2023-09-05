@@ -3,7 +3,9 @@
         "emu.h": "c",
         "ram.h": "c",
         "interrupts.h": "c",
-        "timer.h": "c"
+        "timer.h": "c",
+        "lcd.h": "c",
+        "ppu.h": "c"
     },
     "cmake.configureOnOpen": false
 }
