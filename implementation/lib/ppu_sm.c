@@ -4,6 +4,7 @@
 #include <interrupts.h>
 #include <ppu_sm.h>
 #include <string.h>
+#include <cart.h>
 
 void pipeline_fifo_reset();
 void pipeline_process();
@@ -170,6 +171,10 @@ void ppu_mode_hblank() {
                 frame_count = 0;
 
                 printf("FPS: %d\n", fps);
+
+                if(cart_need_save()) {
+                    cart_battery_save();
+                }
             }
 
             frame_count++;
